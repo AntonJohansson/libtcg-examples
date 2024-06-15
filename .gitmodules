@@ -1,0 +1,3 @@
+[submodule "submodules/libtcg"]
+	path = submodules/libtcg
+	url = https://github.com/AntonJohansson/qemu-libtcg
