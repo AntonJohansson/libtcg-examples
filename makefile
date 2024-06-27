@@ -4,8 +4,8 @@ libtcg := $(abspath submodules/libtcg)
 qemu_n_jobs := 8
 CC := clang
 
-dump-ir: src/dump-ir.c src/cmdline.c src/loadelf.c
-	${CC} $^ -I${prefix}/include -ldl -g -o $@
+dump-ir: src/dump-ir.c src/cmdline.c src/loadelf.c src/common.c src/analyze-reg-src.c
+	${CC} $^ -I${prefix}/include -L${prefix}/lib -ltcg-loader -g -o $@
 
 dump-cfg: src/dump-cfg.c src/loadelf.c
 	${CC} $^ -I${prefix}/include -ldl -g -o $@

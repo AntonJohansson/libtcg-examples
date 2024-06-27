@@ -32,46 +32,46 @@ static inline uint64_t bswaptl(ElfData *data, uint64_t v) {
     return (data->is64bit) ? bswap64(data, v) : bswap32(data, v);
 }
 
-static Arch elf_machine_to_libtcg(bool little_endian,
+static LibTcgArch elf_machine_to_libtcg(bool little_endian,
                                   bool is64bit,
                                   uint64_t machine) {
     if (little_endian) {
         switch (machine) {
-        case EM_386:          return ARCH_I386;
-        case EM_MIPS_RS3_LE:  return (is64bit) ? ARCH_MIPS64EL : ARCH_MIPSEL;
-        case EM_ARM:          return ARCH_ARM;
-        case EM_SH:           return ARCH_SH4;
-        case EM_X86_64:       return ARCH_X86_64;
-        case EM_CRIS:         return ARCH_CRIS;
-        case EM_XTENSA:       return ARCH_XTENSA;
-        case EM_PPC64:        return ARCH_PPC64LE;
-        case EM_ALTERA_NIOS2: return ARCH_NIOS2;
-        case EM_QDSP6:        return ARCH_HEXAGON;
-        case EM_AARCH64:      return ARCH_AARCH64;
-        case EM_MICROBLAZE:   return ARCH_MICROBLAZEEL;
-        case EM_LOONGARCH:    return ARCH_LOONGARCH64;
-        case EM_ALPHA:        return ARCH_ALPHA;
-        case EM_RISCV:        return (is64bit) ? ARCH_RISCV64 : ARCH_RISCV32;
+        case EM_386:          return LIBTCG_ARCH_I386;
+        case EM_MIPS_RS3_LE:  return (is64bit) ? LIBTCG_ARCH_MIPS64EL : LIBTCG_ARCH_MIPSEL;
+        case EM_ARM:          return LIBTCG_ARCH_ARM;
+        case EM_SH:           return LIBTCG_ARCH_SH4;
+        case EM_X86_64:       return LIBTCG_ARCH_X86_64;
+        case EM_CRIS:         return LIBTCG_ARCH_CRIS;
+        case EM_XTENSA:       return LIBTCG_ARCH_XTENSA;
+        case EM_PPC64:        return LIBTCG_ARCH_PPC64LE;
+        case EM_ALTERA_NIOS2: return LIBTCG_ARCH_NIOS2;
+        case EM_QDSP6:        return LIBTCG_ARCH_HEXAGON;
+        case EM_AARCH64:      return LIBTCG_ARCH_AARCH64;
+        case EM_MICROBLAZE:   return LIBTCG_ARCH_MICROBLAZEEL;
+        case EM_LOONGARCH:    return LIBTCG_ARCH_LOONGARCH64;
+        case EM_ALPHA:        return LIBTCG_ARCH_ALPHA;
+        case EM_RISCV:        return (is64bit) ? LIBTCG_ARCH_RISCV64 : LIBTCG_ARCH_RISCV32;
         default:
             abort();
         }
     } else {
         switch (machine) {
-        case EM_SPARC:        return ARCH_SPARC;
-        case EM_68K:          return ARCH_M68K;
-        case EM_MIPS:         return (is64bit) ? ARCH_MIPS64 : ARCH_MIPS;
-        case EM_PARISC:       return ARCH_HPPA;
-        case EM_SPARC32PLUS:  return ARCH_SPARC32PLUS;
-        case EM_PPC:          return ARCH_PPC;
-        case EM_SH:           return ARCH_SH4EB;
-        case EM_PPC64:        return ARCH_PPC64;
-        case EM_S390:         return ARCH_S390X;
-        case EM_ARM:          return ARCH_ARMEB;
-        case EM_SPARCV9:      return ARCH_SPARC64;
-        case EM_OPENRISC:     return ARCH_OR1K;
-        case EM_XTENSA:       return ARCH_XTENSAEB;
-        case EM_AARCH64:      return ARCH_AARCH64_BE;
-        case EM_MICROBLAZE:   return ARCH_MICROBLAZE;
+        case EM_SPARC:        return LIBTCG_ARCH_SPARC;
+        case EM_68K:          return LIBTCG_ARCH_M68K;
+        case EM_MIPS:         return (is64bit) ? LIBTCG_ARCH_MIPS64 : LIBTCG_ARCH_MIPS;
+        case EM_PARISC:       return LIBTCG_ARCH_HPPA;
+        case EM_SPARC32PLUS:  return LIBTCG_ARCH_SPARC32PLUS;
+        case EM_PPC:          return LIBTCG_ARCH_PPC;
+        case EM_SH:           return LIBTCG_ARCH_SH4EB;
+        case EM_PPC64:        return LIBTCG_ARCH_PPC64;
+        case EM_S390:         return LIBTCG_ARCH_S390X;
+        case EM_ARM:          return LIBTCG_ARCH_ARMEB;
+        case EM_SPARCV9:      return LIBTCG_ARCH_SPARC64;
+        case EM_OPENRISC:     return LIBTCG_ARCH_OR1K;
+        case EM_XTENSA:       return LIBTCG_ARCH_XTENSAEB;
+        case EM_AARCH64:      return LIBTCG_ARCH_AARCH64_BE;
+        case EM_MICROBLAZE:   return LIBTCG_ARCH_MICROBLAZE;
         default:
             abort();
         }

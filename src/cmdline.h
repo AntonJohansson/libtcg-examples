@@ -3,13 +3,22 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdint.h>
 
 typedef enum CmdLineOptionType {
     CMDLINE_OPTION_STR,
     CMDLINE_OPTION_ULONG,
     CMDLINE_OPTION_HEX,
     CMDLINE_OPTION_BOOL,
+    CMDLINE_OPTION_REG_TUPLE,
 } CmdLineOptionType;
+
+typedef struct CmdLineRegTuple {
+    uint64_t src_instruction_address;
+    uint16_t tcg_instruction_offset;
+    uint8_t  operand_index;
+    bool present;
+} CmdLineRegTuple;
 
 typedef struct CmdLineOption {
     const char *long_name;
@@ -21,6 +30,7 @@ typedef struct CmdLineOption {
         const char **str;
         unsigned long *ulong;
         bool *b;
+        CmdLineRegTuple *reg_tuple;
     };
     bool required;
     bool parsed;

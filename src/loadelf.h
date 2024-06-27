@@ -1,9 +1,9 @@
 #pragma once
 
-#include "arch.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <qemu/libtcg/libtcg_loader.h>
 
 typedef struct {
     uint8_t *buffer;
@@ -16,7 +16,7 @@ typedef struct {
     uint8_t *shstrtable;
     uint8_t *strtable;
     uint64_t machine;
-    Arch arch;
+    LibTcgArch arch;
 } ElfData;
 
 typedef struct {

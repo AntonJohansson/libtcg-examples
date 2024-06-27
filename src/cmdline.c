@@ -41,6 +41,30 @@ static bool parse_option(CmdLineOption *option, const char *value) {
     case CMDLINE_OPTION_BOOL:
         *option->b = true;
         break;
+    case CMDLINE_OPTION_REG_TUPLE:
+        if (value == NULL) {
+            return false;
+        }
+        char *end = NULL;
+        unsigned long long t0 = strtoull(value, &end, 16);
+        if (t0 == ULONG_MAX || *end != ':' || *(end+1) == 0) {
+            return false;
+        }
+        unsigned long t1 = strtoul(end+1, &end, 10);
+        if (t1 == ULONG_MAX || *end != ':' || *(end+1) == 0) {
+            return false;
+        }
+        unsigned long t2 = strtoul(end+1, &end, 10);
+        if (t2 == ULONG_MAX || *end != 0) {
+            return false;
+        }
+        *option->reg_tuple = (CmdLineRegTuple) {
+            .src_instruction_address = t0,
+            .tcg_instruction_offset = t1,
+            .operand_index = t2,
+            .present = true,
+        };
+        break;
     default:
         abort();
     }
@@ -81,6 +105,10 @@ bool parse_options(CmdLineOption *pos_options,   size_t num_pos_options,
                 break;
             }
         } else {
+            if (pos_index >= num_pos_options) {
+                fprintf(stderr, "[error]: Invalid positional option \"%s\"\n", option);
+                return false;
+            }
             CmdLineOption *pos_option = &pos_options[pos_index++];
             if (!parse_option(pos_option, option)) {
                 fprintf(stderr, "[error]: Invalid positional option \"%s\"\n", option);
