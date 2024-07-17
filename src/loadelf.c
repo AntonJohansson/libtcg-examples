@@ -38,7 +38,7 @@ static LibTcgArch elf_machine_to_libtcg(bool little_endian,
     if (little_endian) {
         switch (machine) {
         case EM_386:          return LIBTCG_ARCH_I386;
-        case EM_MIPS_RS3_LE:  return (is64bit) ? LIBTCG_ARCH_MIPS64EL : LIBTCG_ARCH_MIPSEL;
+        case EM_MIPS:         return (is64bit) ? LIBTCG_ARCH_MIPS64EL : LIBTCG_ARCH_MIPSEL;
         case EM_ARM:          return LIBTCG_ARCH_ARM;
         case EM_SH:           return LIBTCG_ARCH_SH4;
         case EM_X86_64:       return LIBTCG_ARCH_X86_64;
@@ -53,6 +53,7 @@ static LibTcgArch elf_machine_to_libtcg(bool little_endian,
         case EM_ALPHA:        return LIBTCG_ARCH_ALPHA;
         case EM_RISCV:        return (is64bit) ? LIBTCG_ARCH_RISCV64 : LIBTCG_ARCH_RISCV32;
         default:
+            fprintf(stderr, "Unable to find LE machine %lu\n", machine);
             abort();
         }
     } else {
@@ -73,6 +74,7 @@ static LibTcgArch elf_machine_to_libtcg(bool little_endian,
         case EM_AARCH64:      return LIBTCG_ARCH_AARCH64_BE;
         case EM_MICROBLAZE:   return LIBTCG_ARCH_MICROBLAZE;
         default:
+            fprintf(stderr, "Unable to find BE machine %lu\n", machine);
             abort();
         }
     }
@@ -84,10 +86,10 @@ static LibTcgArch elf_machine_to_libtcg(bool little_endian,
             Shdr *sh = (Shdr *) (data->buffer +                             \
                                  data->shoff +                              \
                                  i*data->shentsize);                        \
-            uint32_t name_off = bswaptl(data, sh->sh_name);                 \
+            uint32_t name_off = bswap32(data, sh->sh_name);                 \
             const char *name = (const char *) (data->shstrtable +           \
                                                name_off);                   \
-            if (sh->sh_type == ekind &&                                     \
+            if (bswap32(data, sh->sh_type) == ekind &&                      \
                 strcmp(name, ename) == 0) {                                 \
                 s_hdr = sh;                                                 \
                 break;                                                      \
@@ -97,13 +99,16 @@ static LibTcgArch elf_machine_to_libtcg(bool little_endian,
 
 #define FIND_SYMBOL(Sym, data, s_hdr, ekind, ename, sym)                    \
     do {                                                                    \
-        for (int off = 0; off < s_hdr->sh_size; off += s_hdr->sh_entsize) { \
+        for (uint64_t off = 0;                                              \
+             off < bswaptl(data, s_hdr->sh_size);                           \
+             off += bswaptl(data, s_hdr->sh_entsize)) {                     \
             Sym *s = (Sym *) (data->buffer +                                \
                               bswaptl(data, s_hdr->sh_offset) +             \
                               off);                                         \
-            uint64_t name_off = bswaptl(data, s->st_name);                  \
+            uint64_t name_off = bswap32(data, s->st_name);                  \
             const char *name = (const char *) (data->strtable + name_off);  \
-            if (ELF64_ST_TYPE(s->st_info) == ekind &&                       \
+            uint8_t type = ELF64_ST_TYPE(s->st_info);                       \
+            if ((type == ekind || type == STT_NOTYPE) &&                    \
                 strcmp(name, ename) == 0) {                                 \
                 sym = s;                                                    \
                 break;                                                      \
@@ -121,7 +126,7 @@ static LibTcgArch elf_machine_to_libtcg(bool little_endian,
         Shdr *strtable_hdr = (Shdr *) (data->buffer +                       \
                                        data->shoff +                        \
                                        shstrndx*data->shentsize);           \
-        assert(strtable_hdr->sh_type == SHT_STRTAB);                        \
+        assert(bswap32(data, strtable_hdr->sh_type) == SHT_STRTAB);         \
         data->shstrtable = data->buffer +                                   \
                            bswaptl(data, strtable_hdr->sh_offset);          \
         Shdr *s_hdr = NULL;                                                 \
@@ -132,15 +137,16 @@ static LibTcgArch elf_machine_to_libtcg(bool little_endian,
         } else {                                                            \
             data->strtable = 0;                                             \
         }                                                                   \
-        data->machine = e_hdr->e_machine;                                   \
+        data->machine = bswap16(data, e_hdr->e_machine);                    \
         data->arch = elf_machine_to_libtcg(data->little_endian,             \
                                            data->is64bit,                   \
                                            data->machine);                  \
+        data->entrypoint = bswaptl(data, e_hdr->e_entry);                   \
     } while (0)
 
-bool elf_data(const char *file, ElfData *data) {
+bool elf_data(StackAllocator *stack, const char *file, ElfData *data) {
     /* Start by reading entire file into a buffer */
-    ByteView bytes = read_bytes_from_file(file, 0, 0);
+    ByteView bytes = read_bytes_from_file(stack, file, 0, 0);
     if (bytes.data == NULL) {
         goto fail;
     }
@@ -215,10 +221,10 @@ bool elf_function(ElfData *data, const char *fnname, ElfByteView *view) {
             fprintf(stderr, "Unable to find function symbol \"%s\"\n", fnname);
             return false;
         }
-        s_hdr = (Elf64_Shdr *) (data->buffer + data->shoff + sym->st_shndx*data->shentsize);
+        s_hdr = (Elf64_Shdr *) (data->buffer + data->shoff + bswap16(data, sym->st_shndx)*data->shentsize);
         view->address = bswaptl(data, sym->st_value);
         uint64_t off = view->address - bswaptl(data, s_hdr->sh_addr);
-        view->data = data->buffer + s_hdr->sh_offset + off;
+        view->data = data->buffer + bswaptl(data, s_hdr->sh_offset) + off;
         view->size = bswaptl(data, sym->st_size);
     } else {
         /* Loop over all section headers and look for .text */
@@ -234,10 +240,10 @@ bool elf_function(ElfData *data, const char *fnname, ElfByteView *view) {
             fprintf(stderr, "Unable to find function symbol \"%s\"\n", fnname);
             return false;
         }
-        s_hdr = (Elf32_Shdr *) (data->buffer + data->shoff + sym->st_shndx*data->shentsize);
+        s_hdr = (Elf32_Shdr *) (data->buffer + data->shoff + bswap16(data, sym->st_shndx)*data->shentsize);
         view->address = bswaptl(data, sym->st_value);
         uint64_t off = view->address - bswaptl(data, s_hdr->sh_addr);
-        view->data = data->buffer + s_hdr->sh_offset + off;
+        view->data = data->buffer + bswaptl(data, s_hdr->sh_offset) + off;
         view->size = bswaptl(data, sym->st_size);
     }
 

@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <qemu/libtcg/libtcg_loader.h>
 
+typedef struct StackAllocator StackAllocator;
+
 typedef struct {
     uint8_t *buffer;
     size_t size;
@@ -17,6 +19,7 @@ typedef struct {
     uint8_t *strtable;
     uint64_t machine;
     LibTcgArch arch;
+    uint64_t entrypoint;
 } ElfData;
 
 typedef struct {
@@ -25,6 +28,6 @@ typedef struct {
     size_t size;
 } ElfByteView;
 
-bool elf_data(const char *file, ElfData *data);
+bool elf_data(StackAllocator *stack, const char *file, ElfData *data);
 bool elf_section(ElfData *data, const char *section, ElfByteView *view);
 bool elf_function(ElfData *data, const char *fnname, ElfByteView *view);

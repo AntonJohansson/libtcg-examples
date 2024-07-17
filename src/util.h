@@ -1,5 +1,6 @@
 #pragma once
 
+#include "stack_alloc.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -9,26 +10,24 @@
 
 #define ARRLEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
+typedef struct StackAllocator StackAllocator;
+
 typedef struct ByteView {
     uint8_t *data;
     size_t size;
 } ByteView;
 
-static inline ByteView read_bytes_from_stdin(void) {
+static inline ByteView read_bytes_from_stdin(StackAllocator *stack) {
     FILE *fd = freopen(NULL, "rb", stdin);
     assert(fd != NULL);
 
-
-    size_t size = 64;
-    void *ptr = malloc(size);
-    if (ptr == NULL) {
-        fprintf(stderr, "Failed to malloc file %ld bytes!\n", size);
-        return (ByteView){0};
-    }
-
+    // TODO: We just assume a maximum fixed size on the data coming
+    // in from stdin, clearly not a good idea. Should probably allocate
+    // in chunks or similar.
+    size_t size = 1024;
+    void *ptr = stack_alloc(stack, size);
     size_t bytes_read = fread(ptr, 1, size, fd);
     fclose(fd);
-    printf("%ld\n", bytes_read);
 
     return (ByteView) {
         .data = ptr,
@@ -36,7 +35,8 @@ static inline ByteView read_bytes_from_stdin(void) {
     };
 }
 
-static inline ByteView read_bytes_from_file(const char *file,
+static inline ByteView read_bytes_from_file(StackAllocator *stack,
+                                            const char *file,
                                             size_t offset,
                                             size_t size) {
     FILE *fd = fopen(file, "r");
@@ -50,12 +50,7 @@ static inline ByteView read_bytes_from_file(const char *file,
     }
     fseek(fd, offset, SEEK_SET);
 
-    void *ptr = malloc(size);
-    if (ptr == NULL) {
-        fprintf(stderr, "Failed to malloc file %ld bytes!\n", size);
-        return (ByteView){0};
-    }
-
+    void *ptr = stack_alloc(stack, size);
     size_t bytes_read = fread(ptr, 1, size, fd);
     assert(bytes_read == size);
     fclose(fd);

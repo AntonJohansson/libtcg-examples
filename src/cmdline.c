@@ -80,7 +80,7 @@ bool parse_options(CmdLineOption *pos_options,   size_t num_pos_options,
         size_t option_len = strlen(option);
         if (option_len > 1 && option[0] == '-') {
             bool long_name = option_len > 2 && option[1] == '-';
-            for (int j = 0; j < num_named_options; ++j) {
+            for (size_t j = 0; j < num_named_options; ++j) {
                 CmdLineOption *named_option = &named_options[j];
                 if (named_option->parsed) {
                     continue;
@@ -117,14 +117,14 @@ bool parse_options(CmdLineOption *pos_options,   size_t num_pos_options,
         }
     }
 
-    for (int i = 0; i < num_pos_options; ++i) {
+    for (size_t i = 0; i < num_pos_options; ++i) {
         CmdLineOption *pos_option = &pos_options[i];
         if (pos_option->required && !pos_option->parsed) {
             fprintf(stderr, "[error]: Missing required positional option:\n");
             print_pos_cmdline_option(stderr, pos_option);
         }
     }
-    for (int i = 0; i < num_named_options; ++i) {
+    for (size_t i = 0; i < num_named_options; ++i) {
         CmdLineOption *named_option = &named_options[i];
         if (named_option->required && !named_option->parsed) {
             fprintf(stderr, "[error]: Missing required named option:\n");
@@ -145,7 +145,7 @@ void print_help(FILE *fd,
         .format    = "format",
         .desc      = "desc",
     });
-    for (int i = 0; i < num_pos_options; ++i) {
+    for (size_t i = 0; i < num_pos_options; ++i) {
         CmdLineOption *pos_option = &pos_options[i];
         print_pos_cmdline_option(fd, pos_option);
     }
@@ -157,7 +157,7 @@ void print_help(FILE *fd,
         .format     = "format",
         .desc       = "desc",
     });
-    for (int i = 0; i < num_named_options; ++i) {
+    for (size_t i = 0; i < num_named_options; ++i) {
         CmdLineOption *named_option = &named_options[i];
         print_named_cmdline_option(fd, named_option);
     }
