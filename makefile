@@ -5,13 +5,13 @@ qemu_n_jobs := 8
 CC := clang
 
 srcs := src/dump-ir.c \
-        src/cmdline.c \
-        src/loadelf.c \
-        src/common.c  \
-        src/analyze-reg-src.c \
-        src/analyze-max-stack.c \
-        src/graphviz.c \
-        src/stack_alloc.c
+	src/cmdline.c \
+	src/loadelf.c \
+	src/common.c  \
+	src/analyze-reg-src.c \
+	src/analyze-max-stack.c \
+	src/graphviz.c \
+	src/stack_alloc.c
 
 cflags := -O2 \
 	  -I${prefix}/include \
@@ -26,7 +26,7 @@ dump-ir: ${srcs}
 	${CC} $^ ${cflags} -o $@
 
 libtcg: ${build} ${prefix}
-	cd ${build} && PATH=/home/aj/git/system/llvm/versions/14/bin:/usr/bin CC=clang ${libtcg}/configure \
+	cd ${build} && ${libtcg}/configure \
 	   --prefix=${prefix} \
 	   --enable-libtcg \
 	   --disable-werror \
