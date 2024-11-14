@@ -4,11 +4,26 @@ libtcg := $(abspath submodules/libtcg)
 qemu_n_jobs := 8
 CC := clang
 
-dump-ir: src/dump-ir.c src/cmdline.c src/loadelf.c src/common.c src/analyze-reg-src.c
-	${CC} $^ -I${prefix}/include -L${prefix}/lib -ltcg-loader -g -o $@
+srcs := src/dump-ir.c \
+        src/cmdline.c \
+        src/loadelf.c \
+        src/common.c  \
+        src/analyze-reg-src.c \
+        src/analyze-max-stack.c \
+        src/graphviz.c \
+        src/stack_alloc.c
 
-dump-cfg: src/dump-cfg.c src/loadelf.c
-	${CC} $^ -I${prefix}/include -ldl -g -o $@
+cflags := -O2 \
+	  -I${prefix}/include \
+	  -L${prefix}/lib \
+	  -ltcg-loader \
+	  -lm -g \
+	  -pedantic \
+	  -Wextra \
+	  -std=c11
+
+dump-ir: ${srcs}
+	${CC} $^ ${cflags} -o $@
 
 libtcg: ${build} ${prefix}
 	cd ${build} && PATH=/home/aj/git/system/llvm/versions/14/bin:/usr/bin CC=clang ${libtcg}/configure \
