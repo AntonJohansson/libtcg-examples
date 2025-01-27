@@ -2,7 +2,6 @@ build := $(abspath build)
 prefix := $(abspath root)
 libtcg := $(abspath submodules/libtcg)
 qemu_n_jobs := 8
-CC := clang
 
 srcs := src/dump-ir.c \
 	src/cmdline.c \
