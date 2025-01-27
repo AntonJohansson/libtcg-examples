@@ -14,7 +14,7 @@ srcs := src/dump-ir.c \
 
 cflags := -O2 \
 	  -I${prefix}/include \
-	  -L${prefix}/lib \
+	  -L${prefix}/lib64 \
 	  -ltcg-loader \
 	  -lm -g \
 	  -pedantic \
@@ -47,4 +47,4 @@ ${build}:
 ${prefix}:
 	mkdir -p ${prefix}
 	mkdir -p ${prefix}/bin
-	mkdir -p ${prefix}/lib
+	mkdir -p ${prefix}/lib64
