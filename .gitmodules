@@ -1,3 +1,4 @@
 [submodule "submodules/libtcg"]
 	path = submodules/libtcg
+	branch = feature/libtcg
 	url = https://github.com/AntonJohansson/qemu-libtcg
