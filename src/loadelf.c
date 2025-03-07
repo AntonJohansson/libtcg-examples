@@ -1,18 +1,29 @@
 #include "loadelf.h"
 #include "util.h"
-#include <elf.h>
-#include <endian.h>
+#include "linux-headers/elf.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define HOST_LE 0
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-#define HOST_LE 1
+#if defined(__APPLE__)
+  #include <machine/endian.h>
+  #if BYTE_ORDER == BIG_ENDIAN
+    #define HOST_LE 0
+  #elif BYTE_ORDER == LITTLE_ENDIAN
+    #define HOST_LE 1
+  #else
+    #error We should do something else to check host endianness...
+  #endif
 #else
-#error We should do something else to chfce host endianness...
+  #include <endian.h>
+  #if __BYTE_ORDER == __BIG_ENDIAN
+    #define HOST_LE 0
+  #elif __BYTE_ORDER == __LITTLE_ENDIAN
+    #define HOST_LE 1
+  #else
+    #error We should do something else to check host endianness...
+  #endif
 #endif
 
 static inline uint16_t bswap16(ElfData *data, uint16_t v) {
